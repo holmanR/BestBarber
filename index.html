@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Barber Shop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hero">
+  <div class="hero-content">
+    <p class="direccion">
+     <span class="icon-ubicacion">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+           <path d="M168 0C75.1 0 0 75.1 0 168c0 87.1 144.7 294.4 153.2 306.3a24 24 0 0 0 37.6 0C239.3 462.4 384 255.1 384 168 384 75.1 308.9 0 216 0zm0 240a72 72 0 1 1 0-144 72 72 0 0 1 0 144z"/>
+        </svg>
+     </span>
+        San José de Pileta - El Prado
+   </p>
+ </div>
+</header>
+
+<!-- Barra de navegación secundaria -->
+<div class="sub-nav">
+  <button class="sub-btn volver-btn oculto" onclick="volverInicio()">⬅  Atrás</button>
+  <button class="sub-btn" onclick="mostrarGaleria()">Galería</button>
+  <button class="sub-btn" onclick="mostrarDisenos()">Diseños</button>
+  <button class="sub-btn" onclick="mostrarLocal()">Local</button>
+</div>
+
+
+<!-- VISTA PRINCIPAL -->
+<main class="productos" id="vista-principal">
+
+  <div class="card categoria" onclick="mostrarCategoria('degradado')">
+    <img src="recursos/degradado.jpg">
+    <h3>Cortes de Cabello</h3>
+  </div>
+
+  <div class="card categoria" onclick="mostrarCategoria('cejas')">
+    <img src="recursos/cejas.webp">
+    <h3>Cejas</h3>
+  </div>
+
+  <div class="card categoria" onclick="mostrarCategoria('barba')">
+    <img src="recursos/barba.jpeg">
+    <h3>Barba</h3>
+  </div>
+
+  <div class="card categoria" onclick="mostrarCategoria('completo')">
+    <img src="recursos/completo.jpg">
+    <h3>Servicio Completo</h3>
+    <h5>(Corte + Barba + Cejas)</h5>
+  </div>
+
+</main>
+
+<!-- VISTA CORTES -->
+<section class="productos oculto" id="vista-cortes">
+
+  <div class="barra-volver">
+    <button onclick="volverInicio()">⬅ Volver</button>
+  </div>
+
+  <div id="titulo-categoria"></div>
+  <div id="contenedor-cortes"></div>
+
+</section>
+
+<!--Barra de botones-->
+<section id="vista-galeria" class="productos oculto">
+  <img src="recursos/low.jpg">
+  <img src="recursos/muler.jpeg">
+  <img src="recursos/mohicano.jpeg">
+  <img src="recursos/siete.jpg">
+  <img src="recursos/taper fade.jpg">
+  <img src="recursos/degradado.jpg">
+</section>
+
+<section id="vista-disenos" class="productos oculto">
+  <img src="recursos/diseño1.jpg">
+  <img src="recursos/diseño2.jpg">
+  <img src="recursos/diseño3.jpg">
+  <img src="recursos/diseño4.webp">
+  <img src="recursos/diseño5.jpg">
+  <img src="recursos/diseño6.jpeg">
+  <img src="recursos/diseño7.jpeg">
+  <img src="recursos/diseño8.jpg">
+  <img src="recursos/diseño9.jpeg">
+  <img src="recursos/diseño10.jpg">
+</section>
+
+<section id="vista-local" class="productos oculto">
+  <img src="recursos/fuera.jpg">
+  <img src="recursos/sala.jpeg">
+  <img src="recursos/espejos.jpeg">
+  <img src="recursos/sillas.jpg">
+</section>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModal()">×</span>
+
+    <h2>Reservar turno</h2>
+
+    <input type="text" id="nombre" placeholder="Nombre del cliente">
+    <input type="date" id="fecha">
+    <p id="diaSemana"></p>
+
+    <select id="hora"></select>
+
+    <select id="pago">
+      <option value="">Método de pago</option>
+      <option>Efectivo</option>
+      <option>Daviplata</option>
+      <option>Nequi</option>
+    </select>
+
+    <button class="confirmar" onclick="enviarWhatsApp()">Confirmar</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+<footer class="footer">
+  <p>© Victor A · Barber Shop · Todos los derechos reservados</p>
+  <p>2026</p>
+</footer>
+
+</body>
+</html>
