@@ -372,3 +372,8 @@ button {
   height: 14px;
   fill: #fff;
 }
+
+.card button {
+  margin-top: 8px;
+  width: 100%;
+}

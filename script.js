@@ -2,10 +2,27 @@
 let corteSeleccionado = "";
 let precioSeleccionado = "";
 
-const HORAS = [
-  "08:00 am","09:00 am","10:00 am","11:00 am",
-  "12:00 pm","02:00 pm","03:00 pm","04:00 pm",
-  "05:00 pm","06:00 pm","07:00 pm","08:00 pm"
+function bloquesNecesarios(servicio) {
+  if (servicio === "Cejas") return 1;   // 10 min
+  if (servicio === "Barba") return 2;   // 20 min
+  return 6; // Cortes y completo = 1 hora
+}
+
+const BLOQUES = [
+  "08:00","08:10","08:20","08:30","08:40","08:50",
+  "09:00","09:10","09:20","09:30","09:40","09:50",
+  "10:00","10:10","10:20","10:30","10:40","10:50",
+  "11:00","11:10","11:20","11:30","11:40","11:50",
+
+  // ⛔ 12:00–13:00 almuerzo
+
+  "13:00","13:10","13:20","13:30","13:40","13:50",
+  "14:00","14:10","14:20","14:30","14:40","14:50",
+  "15:00","15:10","15:20","15:30","15:40","15:50",
+  "16:00","16:10","16:20","16:30","16:40","16:50",
+  "17:00","17:10","17:20","17:30","17:40","17:50",
+  "18:00","18:10","18:20","18:30","18:40","18:50",
+  "19:00","19:10","19:20","19:30","19:40","19:50"
 ];
 
 const CORTES = {
@@ -20,24 +37,6 @@ const CORTES = {
       { nombre: "Taper Fade", precio: "10.000", tiempo: "40 min", img: "recursos/taper fade.jpg" }
     ]
   },
-  cejas: {
-    titulo: "",
-    items: [
-      { nombre: "Cejas", precio: "2.000", tiempo: "5 min", img: "recursos/cejas.webp" }
-    ]
-  },
-  barba: {
-    titulo: "",
-    items: [
-      { nombre: "Barba", precio: "5.000", tiempo: "10 min", img: "recursos/barba.jpeg" }
-    ]
-  },
-  completo: {
-    titulo: "",
-    items: [
-      { nombre: "Servicio Completo", precio: "15.000", tiempo: "1 hora", img: "recursos/completo.jpg" }
-    ]
-  }
 };
 
 /* ================= UTILIDAD ================= */
@@ -88,8 +87,12 @@ function volverInicio() {
 function abrirModal(corte, precio) {
   corteSeleccionado = corte;
   precioSeleccionado = precio;
+
   document.querySelector(".hero").style.display = "none";
   document.getElementById("modal").style.display = "flex";
+
+  const fechaInput = document.getElementById("fecha");
+  fechaInput.dispatchEvent(new Event("change")); // 🔥 CLAVE
 }
 
 function cerrarModal() {
@@ -110,17 +113,51 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+function formatearHora12(hora24) {
+  let [h, m] = hora24.split(":").map(Number);
+  const ampm = h >= 12 ? "pm" : "am";
+  h = h % 12;
+  if (h === 0) h = 12;
+  return `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")} ${ampm}`;
+}
+
 function cargarHoras(fecha) {
   const select = document.getElementById("hora");
   select.innerHTML = `<option value="">Selecciona la hora</option>`;
 
   const reservas = JSON.parse(localStorage.getItem("reservas")) || {};
-  const ocupadas = reservas[fecha] || [];
+  const ocupados = reservas[fecha] || [];
 
-  HORAS.forEach(hora => {
-    if (!ocupadas.includes(hora)) {
-      select.innerHTML += `<option>${hora}</option>`;
+  const hoy = new Date();
+  const fechaSeleccionada = new Date(fecha + "T00:00:00");
+
+  const bloquesServicio = bloquesNecesarios(corteSeleccionado || "Corte");
+
+  BLOQUES.forEach((bloque, i) => {
+
+    // 🔒 SOLO permitir inicios alineados
+    if (i % bloquesServicio !== 0) return;
+
+    // Verificar espacio continuo
+    let disponible = true;
+    for (let j = 0; j < bloquesServicio; j++) {
+      const b = BLOQUES[i + j];
+      if (!b || ocupados.includes(b)) {
+        disponible = false;
+        break;
+      }
     }
+    if (!disponible) return;
+
+    const [h, m] = bloque.split(":").map(Number);
+    const horaBloque = new Date(fechaSeleccionada);
+    horaBloque.setHours(h, m, 0, 0);
+
+    const esHoy = hoy.toDateString() === fechaSeleccionada.toDateString();
+    const yaPaso = esHoy && horaBloque <= hoy;
+    if (yaPaso) return;
+
+    select.innerHTML += `<option value="${bloque}">${formatearHora12(bloque)}</option>`;
   });
 }
 
@@ -139,16 +176,33 @@ function enviarWhatsApp() {
 
   const reservas = JSON.parse(localStorage.getItem("reservas")) || {};
   if (!reservas[fecha]) reservas[fecha] = [];
-  reservas[fecha].push(hora);
+
+  const bloques = bloquesNecesarios(corteSeleccionado);
+  const index = BLOQUES.indexOf(hora);
+
+  // 🔒 Verificamos que haya espacio suficiente
+  for (let i = 0; i < bloques; i++) {
+    const bloque = BLOQUES[index + i];
+    if (!bloque || reservas[fecha].includes(bloque)) {
+      alert("No hay tiempo suficiente disponible para ese servicio en ese horario");
+      cargarHoras(fecha);
+      return;
+    }
+  }
+
+  // Guardamos todos los bloques ocupados
+  for (let i = 0; i < bloques; i++) {
+    reservas[fecha].push(BLOQUES[index + i]);
+  }
+
   localStorage.setItem("reservas", JSON.stringify(reservas));
 
   const msg =
-    `*Hola, quiero reservar un turno* %0A%0A` +
+    `*Reserva de turno* %0A%0A` +
     `*Nombre*: ${nombre}%0A` +
-    `*Corte*: ${corteSeleccionado}%0A` +
+    `*Servicio*: ${corteSeleccionado}%0A` +
     `*Fecha*: ${fecha} (${dia})%0A` +
-    `*Hora*: ${hora}%0A` +
-    `*Precio*: $${precioSeleccionado}%0A` +
+    `*Hora inicio*: ${hora}%0A` +
     `*Pago*: ${pago}`;
 
   window.open(`https://wa.me/573219538179?text=${msg}`, "_blank");
