@@ -121,6 +121,49 @@ function formatearHora12(hora24) {
   return `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")} ${ampm}`;
 }
 
+function convertirHoraTextoABloque(texto) {
+  texto = texto.toLowerCase().replace(/\s/g, "");
+
+  let match = texto.match(/(\d{1,2}):?(\d{0,2})(am|pm)/);
+  if (!match) return null;
+
+  let h = parseInt(match[1]);
+  let m = match[2] ? parseInt(match[2]) : 0;
+  let ampm = match[3];
+
+  if (ampm === "pm" && h !== 12) h += 12;
+  if (ampm === "am" && h === 12) h = 0;
+
+  const hora24 = `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}`;
+
+  return BLOQUES.includes(hora24) ? hora24 : null;
+}
+
+function sugerirHora(fecha, horaInicio, bloquesServicio) {
+  const reservas = JSON.parse(localStorage.getItem("reservas")) || {};
+  const ocupados = reservas[fecha] || [];
+
+  let index = BLOQUES.indexOf(horaInicio);
+
+  for (let i = index + 1; i < BLOQUES.length; i++) {
+    let disponible = true;
+
+    for (let j = 0; j < bloquesServicio; j++) {
+      const b = BLOQUES[i + j];
+      if (!b || ocupados.includes(b)) {
+        disponible = false;
+        break;
+      }
+    }
+
+    if (disponible) {
+      return BLOQUES[i];
+    }
+  }
+
+  return null;
+}
+
 function cargarHoras(fecha) {
   const select = document.getElementById("hora");
   select.innerHTML = `<option value="">Selecciona la hora</option>`;
@@ -165,14 +208,22 @@ function cargarHoras(fecha) {
 function enviarWhatsApp() {
   const nombre = document.getElementById("nombre").value;
   const fecha = document.getElementById("fecha").value;
-  const hora = document.getElementById("hora").value;
+  const horaTexto = document.getElementById("hora").value;
+  const hora = convertirHoraTextoABloque(horaTexto);
   const pago = document.getElementById("pago").value;
   const dia = document.getElementById("diaSemana").textContent;
 
-  if (!nombre || !fecha || !hora || !pago) {
-    alert("Completa todos los campos");
+   if (!nombre || !fecha || !horaTexto || !pago) {
+     alert("Completa todos los campos");
+     return;
+   }
+
+  if (!hora) {
+    document.getElementById("sugerenciaHora").textContent =
+    "Formato inválido. Ejemplo: 10:00 am";
     return;
   }
+
 
   const reservas = JSON.parse(localStorage.getItem("reservas")) || {};
   if (!reservas[fecha]) reservas[fecha] = [];
@@ -182,10 +233,18 @@ function enviarWhatsApp() {
 
   // 🔒 Verificamos que haya espacio suficiente
   for (let i = 0; i < bloques; i++) {
-    const bloque = BLOQUES[index + i];
-    if (!bloque || reservas[fecha].includes(bloque)) {
-      alert("No hay tiempo suficiente disponible para ese servicio en ese horario");
-      cargarHoras(fecha);
+   const bloque = BLOQUES[index + i];
+   if (!bloque || reservas[fecha].includes(bloque)) {
+     const sugerida = sugerirHora(fecha, hora, bloques);
+     if (sugerida) {
+      document.getElementById("sugerenciaHora").innerHTML =
+        `❌ Esa hora no está disponible.<br>
+         ✅ Turno cercano: ${formatearHora12(sugerida)}`;
+     } else {
+      document.getElementById("sugerenciaHora").textContent =
+        "❌ No hay horarios disponibles ese día";
+     }
+
       return;
     }
   }
@@ -194,7 +253,7 @@ function enviarWhatsApp() {
   for (let i = 0; i < bloques; i++) {
     reservas[fecha].push(BLOQUES[index + i]);
   }
-
+  document.getElementById("sugerenciaHora").textContent = "";
   localStorage.setItem("reservas", JSON.stringify(reservas));
 
   const msg =
