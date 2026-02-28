@@ -28,13 +28,15 @@
   <button class="sub-btn" onclick="mostrarLocal()">Local</button>
 </div>
 
-
 <!-- VISTA PRINCIPAL -->
 <main class="productos" id="vista-principal">
 
-  <div class="card categoria" onclick="mostrarCategoria('degradado')">
+  <div class="card">
     <img src="recursos/degradado.jpg">
     <h3>Cortes de Cabello</h3>
+    <span class="tiempo">🕒 ${corte.tiempo}</span>
+    <p class="precio">$10.000</p>
+    <button onclick="abrirModal('corte','10.000')">Reservar</button>
   </div>
 
    <!-- CEJAS -->
@@ -77,14 +79,6 @@
 </section>
 
 <!--Barra de botones-->
-<section id="vista-galeria" class="productos oculto">
-  <img src="recursos/low.jpg">
-  <img src="recursos/muler.jpeg">
-  <img src="recursos/mohicano.jpeg">
-  <img src="recursos/siete.jpg">
-  <img src="recursos/taper fade.jpg">
-  <img src="recursos/degradado.jpg">
-</section>
 
 <section id="vista-disenos" class="productos oculto">
   <img src="recursos/diseño1.jpg">
