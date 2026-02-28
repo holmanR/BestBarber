@@ -3,6 +3,7 @@ let corteSeleccionado = "";
 let precioSeleccionado = "";
 
 function bloquesNecesarios(servicio) {
+  if (servicio == "degradado") return 3; // 40 min
   if (servicio === "Cejas") return 1;   // 10 min
   if (servicio === "Barba") return 2;   // 20 min
   return 6; // Cortes y completo = 1 hora
@@ -25,20 +26,6 @@ const BLOQUES = [
   "19:00","19:10","19:20","19:30","19:40","19:50"
 ];
 
-const CORTES = {
-  degradado: {
-    titulo: "",
-    items: [
-      { nombre: "Muller", precio: "10.000", tiempo: "40 min", img: "recursos/muler.jpeg" },
-      { nombre: "Siete", precio: "10.000", tiempo: "40 min", img: "recursos/siete.jpg" },
-      { nombre: "Low Fade", precio: "10.000", tiempo: "40 min", img: "recursos/low.jpg" },
-      { nombre: "Degradado", precio: "10.000", tiempo: "40 min", img: "recursos/degradado.jpg" },
-      { nombre: "Mohicano", precio: "10.000", tiempo: "40 min", img: "recursos/mohicano.jpeg" },
-      { nombre: "Taper Fade", precio: "10.000", tiempo: "40 min", img: "recursos/taper fade.jpg" }
-    ]
-  },
-};
-
 /* ================= UTILIDAD ================= */
 function ocultarTodo() {
   document.getElementById("vista-principal").style.display = "none";
@@ -58,20 +45,6 @@ function mostrarCategoria(tipo) {
 
   const contenedor = document.getElementById("contenedor-cortes");
   contenedor.innerHTML = "";
-
-  CORTES[tipo].items.forEach(corte => {
-    contenedor.innerHTML += `
-      <div class="card">
-        <img src="${corte.img}">
-        <div class="titulo-corte">
-          <h3>${corte.nombre}</h3>
-          <span class="tiempo">🕒 ${corte.tiempo}</span>
-        </div>
-        <p class="precio">$${corte.precio}</p>
-        <button onclick="abrirModal('${corte.nombre}','${corte.precio}')">Reservar</button>
-      </div>
-    `;
-  });
 
   window.scrollTo(0, 0);
 }
