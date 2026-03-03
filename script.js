@@ -237,7 +237,7 @@ function enviarWhatsApp() {
     `*Hora inicio*: ${hora}%0A` +
     `*Pago*: ${pago}`;
 
-  window.open(`https://wa.me/573219538179?text=${msg}`, "_blank");
+  window.open(`https://wa.me/573216454377?text=${msg}`, "_blank");
   cerrarModal();
 }
 
